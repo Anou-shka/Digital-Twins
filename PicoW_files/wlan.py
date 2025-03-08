@@ -1,4 +1,4 @@
-import wifi_config as wifi
+import wifi_pico_config as wifi
 import network
 import time
 
@@ -12,4 +12,5 @@ def wifi_connect():
         time.sleep(1)
     ip = wlan.ifconfig()[0]
     print(f'Connected on {ip}')
+
 

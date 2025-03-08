@@ -3,6 +3,7 @@ from utime import sleep
 import urequests
 import network
 from wlan import wifi_connect
+import wifi_pico_config as wifi
 from time
 
 # from read_airflow import read_pressure
@@ -12,7 +13,7 @@ from read_co2 import read_temp
 wifi_connect()
 
 # ✅ Server URL
-server_url = 'http://192.168.0.173:3000/upload'
+server_url = wifi.url
 
 while True: 
     try:
@@ -47,5 +48,6 @@ while True:
         print("Error sending data:", e)
 
     time.sleep(10)  # ✅ Avoid excessive polling
+
 
 
