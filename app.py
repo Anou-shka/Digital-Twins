@@ -46,6 +46,7 @@ def home():
 def upload_data():
     try:
         data = request.json  # Extract JSON payload
+        utc_now = datetime.utcnow()
         sgt = pytz.timezone("Asia/Singapore")
         timestamp = datetime.now(pytz.utc).astimezone(sgt).strftime('%Y-%m-%d %H:%M:%S')
 
