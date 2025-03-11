@@ -12,25 +12,6 @@ wifi_connect()
 pico_main_run()
 
 
-# import urequests
-# 
-# server_url = "https://digital-twins-3zfp.onrender.com/upload"  # Update with your actual Render URL
-# 
-# data = {
-#     'temperature_C': 22.5,
-#     'temperature_F': 72.5,
-#     'humidity': 45.0,
-#     'ADC': 1024,
-#     'Voltage': 3.3,
-#     'pressure': 1013
-# }
-# 
-# response = urequests.post(server_url, json=data)
-# response.close()
-# print("✅ Data sent successfully!")
-
-
-
 
 ## Connect to the wifi
 ## Read and Send the data from the sensors to firebase database
