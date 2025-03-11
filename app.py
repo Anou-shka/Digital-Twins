@@ -48,13 +48,14 @@ def upload_data():
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # ✅ Extract values safely (default to 'N/A' if missing)
+        co2 = data.get('pressure', 'N/A')
         temp_C = data.get('temperature_C', 'N/A')
         temp_F = data.get('temperature_F', 'N/A')
         humidity = data.get('humidity', 'N/A')
         ADC = data.get('ADC', 'N/A')
         Voltage = data.get('Voltage', 'N/A')
         pressure = data.get('pressure', 'N/A')
-        co2 = data.get('pressure', 'N/A')
+       
 
         # ✅ Prepare row for Google Sheets
         data_with_timestamp = [timestamp, temp_C, temp_F, humidity, ADC, Voltage, pressure, co2]
