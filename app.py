@@ -3,6 +3,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import json
+import pytz
 import os 
 
 app = Flask(__name__)
@@ -45,7 +46,8 @@ def home():
 def upload_data():
     try:
         data = request.json  # Extract JSON payload
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sgt = pytz.timezone("Asia/Singapore")
+        timestamp = datetime.now(pytz.utc).astimezone(sgt).strftime('%Y-%m-%d %H:%M:%S')
 
         # ✅ Extract values safely (default to 'N/A' if missing)
         temp_C = data.get('temperature_C', 'N/A')
