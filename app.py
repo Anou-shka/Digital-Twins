@@ -54,9 +54,10 @@ def upload_data():
         ADC = data.get('ADC', 'N/A')
         Voltage = data.get('Voltage', 'N/A')
         pressure = data.get('pressure', 'N/A')
+        co2 = data.get('pressure', 'N/A')
 
         # ✅ Prepare row for Google Sheets
-        data_with_timestamp = [timestamp, temp_C, temp_F, humidity, ADC, Voltage, pressure]
+        data_with_timestamp = [timestamp, temp_C, temp_F, humidity, ADC, Voltage, pressure, co2]
         sheet.append_row(data_with_timestamp)
 
         return '✅ Data Uploaded Successfully', 200
