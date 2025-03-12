@@ -57,6 +57,7 @@ def upload_data():
         ADC = data.get('ADC', 'N/A')
         Voltage = data.get('Voltage', 'N/A')
         pressure = data.get('pressure', 'N/A')
+        airspeed = data.get('airspeed', 'N/A')
         co2 = data.get('co2', 'N/A')
        
 
