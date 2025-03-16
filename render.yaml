@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: app
+    env: python
+    plan: free
+    autoIdleTimeoutSeconds: 0  # Prevents auto-shutdown

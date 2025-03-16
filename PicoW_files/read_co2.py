@@ -82,3 +82,47 @@ while True:
 # #     print(f"Co2 concentration: {co2_concentration} ppm")
 # #     time.sleep(2)  # Read every 2 seconds
 
+
+
+from machine import UART, Pin
+import time
+
+# Initialize UART1 (TX=8, RX=9) for MH-Z19C communication
+uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
+
+# Command to request CO₂ concentration
+request_data = bytearray([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79])
+
+def crc8(data):
+    """Calculate CRC checksum according to MH-Z19C datasheet."""
+    crc = 0x00
+    for i in range(1, 8):
+        crc += data[i]
+    crc = (~crc & 0xFF) + 1  # Invert and add 1
+    return crc & 0xFF
+
+def read_co2():
+    """Reads CO₂ concentration from MH-Z19C sensor."""
+    uart.read()  # Flush buffer before reading
+    uart.write(request_data)  # Send CO₂ request command
+    time.sleep(0.1)  # Wait for response
+
+    response = uart.read(9)  # Read 9-byte response
+
+    if response and len(response) == 9:
+        if crc8(response) == response[8]:  # Validate checksum
+            co2_value = (response[2] << 8) + response[3]  # Convert bytes to ppm
+            return co2_value
+        else:
+            print("CRC Error: Data might be corrupted.")
+            return None
+    else:
+        print("No valid response from sensor.")
+        return None
+
+# Read CO₂ concentration in a loop
+while True:
+    co2_ppm = read_co2()
+    if co2_ppm is not None:
+        print(f"CO₂ Concentration: {co2_ppm} ppm")
+    time.sleep(60)  # Read every 60 seconds (as per original script)

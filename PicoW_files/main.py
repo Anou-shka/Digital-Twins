@@ -1,24 +1,23 @@
 from wlan import wifi_connect
-from ap import wifi_access_point
 from test import pico_main_run
+from excel_update import excel_update
+import time
 
-## Connecting to Wifi
-wifi_connect()
+# ✅ Keep trying to connect to WiFi before proceeding
+ wifi_connect()
 
-## Creating an access point for pico 
-# wifi_access_point()  #Dont need it as of now 
-
-## Blinking the LED light to confirm that main.py ran
+# ✅ Confirm that main.py ran by blinking LED
 pico_main_run()
 
-
-
-## Connect to the wifi
-## Read and Send the data from the sensors to firebase database
-## Figure out the timestamp 
-## Sleep for 5 mins and restart the whole thing
-## Average lift time per person (5-floor trip): ~47.5 seconds   
-## Maximum lift time (full 10-floor trip): ~85.5 seconds
-## For your project, use ~45-50 seconds as a reasonable estimate for the average lift time per passenger. 🚀
-
+# ✅ Send data at synchronized intervals (every 20 seconds at x:00, x:20, x:40)
+while True:
+#     wifi_connect()
+    pico_main_run()
+#     current_time = time.time()  # Get current time
+#     wait_time = 20 - (current_time % 20)  # Calculate time to wait for sync
+#     print(f"Waiting {wait_time:.2f} seconds to sync with 20-second intervals...")
+    time.sleep(20)  # Wait to sync
+# 
+#     # ✅ Send data
+    excel_update()
 
