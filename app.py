@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import pytz
 import os 
+import link as lk
 
 app = Flask(__name__)
 
@@ -12,7 +13,6 @@ app = Flask(__name__)
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
 # ✅ Read Google Sheets Credentials from Environment Variable'
-# sheet_url = "https://docs.google.com/spreadsheets/d/17kuUgLq9pMk_KvxmGSau8qpLwPOhwNH4lPg8_WLuM0s/edit?usp=sharing"
 creds_json = os.getenv("GOOGLE_SHEETS_CREDS_JSON")
 
 if not creds_json:

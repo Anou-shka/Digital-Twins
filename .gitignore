@@ -1,6 +1,9 @@
 fyp/ 
 PicoW_files/webrepl/
+FYP_Models/credentials.json
+FYP_Models/links.py
 
 credentials.json
+links.py
 
 PicoW_files/wifi_pico_config.py
