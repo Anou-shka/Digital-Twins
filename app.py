@@ -5,7 +5,6 @@ from datetime import datetime
 import json
 import pytz
 import os 
-import link as lk
 
 app = Flask(__name__)
 
