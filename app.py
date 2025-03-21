@@ -51,6 +51,7 @@ def upload_data():
         timestamp = datetime.now(pytz.utc).astimezone(sgt).strftime('%Y-%m-%d %H:%M:%S')
 
         # ✅ Extract values safely (default to 'N/A' if missing)
+        device = data.get('device', 'N/A')
         temp_C = data.get('temperature_C', 'N/A')
         temp_F = data.get('temperature_F', 'N/A')
         humidity = data.get('humidity', 'N/A')
@@ -62,7 +63,7 @@ def upload_data():
        
 
         # ✅ Prepare row for Google Sheets
-        data_with_timestamp = [timestamp, temp_C, temp_F, humidity, ADC, Voltage, pressure, airspeed, co2]
+        data_with_timestamp = [device, timestamp, temp_C, temp_F, humidity, ADC, Voltage, pressure, airspeed, co2]
         sheet.append_row(data_with_timestamp)
 
         return '✅ Data Uploaded Successfully', 200
