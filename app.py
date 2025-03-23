@@ -62,7 +62,7 @@ def upload_data():
        
 
         # ✅ Prepare row for Google Sheets
-        data_with_timestamp = [timestamp, device, temp_C, temp_F, humidity, ADC, Voltage, pressure, airspeed, co2]
+        data_with_timestamp = [timestamp, device, temp_C, temp_F, humidity, co2, ADC, Voltage, pressure, airspeed]
         sheet.append_row(data_with_timestamp)
 
         return '✅ Data Uploaded Successfully', 200
