@@ -1,128 +1,47 @@
-from machine import UART, Pin
-import time
+import machine
+import utime
 
-# Initialize UART1 with correct TX and RX pins
-uart = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+PWM_PIN = 10  # GPIO pin connected to the sensor's PWM output
+co2_pwm = machine.Pin(PWM_PIN, machine.Pin.IN)
 
-# MH-Z19C command to request CO₂ concentration
-request_data = bytearray([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79])
-
-def read_co2():
-    uart.read()  # Clear any buffered data before sending a request
-    uart.write(request_data)  # Send request command
-    time.sleep(0.2)  # Wait longer for sensor response
-
-    attempts = 5  # Retry up to 5 times
-    response = None
-
-    for _ in range(attempts):
-        if uart.any():  # Check if data is available
-            response = uart.read(9)  # Read 9 bytes
-            if response and len(response) == 9:  # Ensure correct length
-                break
-        time.sleep(0.1)  # Wait and retry if needed
-
-    if response and len(response) == 9:
-        if response[0] == 0xFF and response[1] == 0x86:  # Validate packet structure
-            high = response[2]
-            low = response[3]
-            co2_concentration = (high << 8) + low  # Convert to ppm
-            return co2_concentration
-        else:
-            print("Invalid data format received. Raw:", response)
-    else:
-        print("No valid response or data length mismatch. Raw:", response)
-
-    return None  # Return None if invalid or no response
-
-# Run the CO₂ reading function in a loop
-while True:
-    co2_concentration = read_co2()
-    if co2_concentration is not None:
-        print(f"CO₂ Concentration: {co2_concentration} ppm")
-    else:
-        print("Failed to read CO₂ concentration.")
-    time.sleep(2)  # Read every 2 seconds
-
-
-# from machine import UART, Pin
-# import time
-
-# # Initialize UART1 with correct TX and RX pins
-# uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
-
-# # MH-Z19C command to request CO₂ concentration
-# request_data = bytearray([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79])
-
-# def read_co2():
-#     uart.write(request_data)  # Send request command
-# #     time.sleep(0.1)  # Wait for response
-
-#     if uart.any():  # Check if data is available
-#         response = uart.read(9)  # Read 9 bytes of response
-
-#         if response and len(response) == 9:
-#             high = response[2]
-#             low = response[3]
-#             co2_concentration = (high << 8) + low  # Convert to ppm
-            
-#             # Return the CO₂ value
-#             return co2_concentration  
-#         else:
-#             print("Invalid data received.")
-#             return None  # Return None if invalid data
-#     else:
-#         print("No response from sensor.")
-#         return None  # Return None if no response
-
-
-# # Run the CO₂ reading function in a loop
-# # while True:
-# #     co2_concentration = read_co2()
-# #     print(f"Co2 concentration: {co2_concentration} ppm")
-# #     time.sleep(2)  # Read every 2 seconds
-
-
-
-from machine import UART, Pin
-import time
-
-# Initialize UART1 (TX=8, RX=9) for MH-Z19C communication
-uart = UART(1, baudrate=9600, tx=Pin(8), rx=Pin(9))
-
-# Command to request CO₂ concentration
-request_data = bytearray([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79])
-
-def crc8(data):
-    """Calculate CRC checksum according to MH-Z19C datasheet."""
-    crc = 0x00
-    for i in range(1, 8):
-        crc += data[i]
-    crc = (~crc & 0xFF) + 1  # Invert and add 1
-    return crc & 0xFF
-
-def read_co2():
-    """Reads CO₂ concentration from MH-Z19C sensor."""
-    uart.read()  # Flush buffer before reading
-    uart.write(request_data)  # Send CO₂ request command
-    time.sleep(0.1)  # Wait for response
-
-    response = uart.read(9)  # Read 9-byte response
-
-    if response and len(response) == 9:
-        if crc8(response) == response[8]:  # Validate checksum
-            co2_value = (response[2] << 8) + response[3]  # Convert bytes to ppm
-            return co2_value
-        else:
-            print("CRC Error: Data might be corrupted.")
+def read_co2_pwm():
+    """Reads PWM signal and calculates CO₂ concentration."""
+    th_start = utime.ticks_us()
+    
+    # Wait for LOW to HIGH transition
+    while co2_pwm.value() == 0:
+        if utime.ticks_diff(utime.ticks_us(), th_start) > 5000000:  # 5-second timeout for warmup
             return None
-    else:
-        print("No valid response from sensor.")
-        return None
+    th = utime.ticks_us()
+    
+    # Wait for HIGH to LOW transition (th duration)
+    while co2_pwm.value() == 1:
+        if utime.ticks_diff(utime.ticks_us(), th) > 5000000:
+            return None
+    th = utime.ticks_diff(utime.ticks_us(), th) / 1000  # Convert to ms
+    
+    # Wait for LOW to HIGH transition (tl duration)
+    tl_start = utime.ticks_us()
+    while co2_pwm.value() == 0:
+        if utime.ticks_diff(utime.ticks_us(), tl_start) > 5000000:
+            return None
+    tl = utime.ticks_diff(utime.ticks_us(), tl_start) / 1000  # Convert to ms
+    
+    
+    # Calculate CO₂ concentration using the formula
+    if th > 0:
+        co2_ppm = 5000 * (th - 2) / (th + tl - 4)
+        print(f"CO2 (PWM): {co2_ppm:.2f} ppm")
+        return co2_ppm
+    return None
 
-# Read CO₂ concentration in a loop
+print("Reading CO₂ from PWM... (Stabilizing for 10 seconds)")
+utime.sleep(6000)  # Initial 10-minute warm-up period
+print("Done")
+
 while True:
-    co2_ppm = read_co2()
-    if co2_ppm is not None:
-        print(f"CO₂ Concentration: {co2_ppm} ppm")
-    time.sleep(60)  # Read every 60 seconds (as per original script)
+    co2_ppm = read_co2_pwm()
+    if co2_ppm is None:
+        print("Failed to read PWM signal. Check wiring.")
+    utime.sleep(15)  # Read every 15 seconds to match environmental response time
+

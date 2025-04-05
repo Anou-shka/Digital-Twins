@@ -1,38 +1,52 @@
-from machine import ADC, Pin
-import utime
+from machine import ADC
+from time import sleep
 
-# ✅ Define ADC pin for MPXV7002DP
-MPXV_PIN = 27  # GP26 (Pin 31)
-adc = ADC(Pin(MPXV_PIN))
+# Constants
+ADC_PIN = 26  # GP26 = ADC0 on Pico W
+VREF = 3.3  # ADC reference voltage (Pico)
+SUPPLY_VOLTAGE = 5.0  # MPXV7002DP powered by 5V
+DIVIDER_SCALING = 2.5  # 15kΩ / 10kΩ voltage divider
+ADC_MAX = 65535  # 16-bit ADC
 
-# ✅ MPXV7002DP Sensor Constants
-VCC = 5.0  # Operating voltage (5V)
-ADC_MAX = 65535  # 16-bit ADC resolution
-V_OFFSET = 2.5  # Zero pressure voltage (2.5V at 0 kPa)
-SENSITIVITY = 0.0025  # ✅ Corrected sensitivity (2.5mV per Pa)
+# Initialize ADC
+adc = ADC(ADC_PIN)
 
-def read_pressure():
-    """Read analog voltage and convert it to pressure (kPa)"""
-    raw_adc = adc.read_u16()  # Read raw ADC value (0-65535)
-    voltage = (raw_adc / ADC_MAX) * VCC  # Convert ADC value to voltage
-    
-    # ✅ Prevent negative pressure if sensor is not properly connected
-    if voltage < 0.5 or voltage > 4.5:  # Noise check range
-        return None, None, None
+def read_voltage():
+    raw = adc.read_u16()
+    voltage_at_adc = (raw / ADC_MAX) * VREF
+    actual_sensor_voltage = voltage_at_adc * DIVIDER_SCALING
+    return actual_sensor_voltage
 
-    pressure = (voltage - V_OFFSET) / SENSITIVITY  # Prevent negative values
-    return raw_adc, voltage, pressure
+def voltage_to_pressure_kpa(voltage):
+    # From MPXV7002DP datasheet:
+    # Vout = Vs * (0.2 * P + 0.5)
+    # Rearranged: P = ((Vout / Vs) - 0.5) / 0.2
+    pressure_kpa = ((voltage / SUPPLY_VOLTAGE) - 0.5) / 0.2
+    return pressure_kpa
 
-# while True:
-#     raw_adc, voltage, pressure = read_pressure()
-# 
-#     if raw_adc is None:
-#         print("⚠️ No sensor detected or invalid reading! Check wiring.")
-#     else:
-#         print(f"ADC Value: {raw_adc}")
-#         print(f"Voltage: {voltage:.3f}V")
-#         print(f"Pressure: {pressure:.3f} kPa")
-# 
-#     utime.sleep(2)
+def pressure_kpa_to_pa(pressure_kpa):
+    return pressure_kpa * 1000
 
+def pressure_to_airspeed(pressure_pa, temperature_c=28.1):
+    R = 287.05  # Specific gas constant for dry air [J/(kg·K)]
+    temp_k = temperature_c + 273.15
+    rho = 101325 / (R * temp_k)  # Ideal gas law
+
+    pressure_diff = max(abs(pressure_pa), 0)  # Only use positive pressure
+    airspeed = (2 * pressure_diff / rho) ** 0.5 if pressure_diff > 0 else 0
+    return airspeed
+
+
+while True:
+    voltage = read_voltage()
+    pressure_kpa = voltage_to_pressure_kpa(voltage)
+    pressure_pa = pressure_kpa_to_pa(pressure_kpa)
+    airspeed = pressure_to_airspeed(pressure_pa, temperature_c=28.1)
+    print(f"Voltage (corrected): {voltage:.3f} V")
+    print(f"Pressure: {pressure_kpa:.3f} kPa")
+    print(f"Pressure: {pressure_pa:.1f} Pa")
+    print(f"Airspeed: {airspeed:.2f} m/s")
+    print("-" * 30)
+
+    sleep(10)
 
