@@ -46,5 +46,5 @@ Elevators are high-risk zones for disease transmission due to limited ventilatio
 ## Getting Started
 
 1. Clone the repo:
-   git clone https://gitlab.ntulily.org/anouskha005/digital-twins.git \n
+   git clone https://gitlab.ntulily.org/anouskha005/digital-twins.git /n
    pip install -r requirements.txt
