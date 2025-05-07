@@ -1,3 +1,6 @@
+# This script reads CO₂ concentration from a sensor using PWM output.
+# It waits for the sensor to stabilize, then reads the PWM signal to calculate CO₂ concentration.
+# This code is for the Raspberry Pi Pico W
 import machine
 import utime
 

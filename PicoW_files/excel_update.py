@@ -1,3 +1,6 @@
+# This code is for the Raspberry Pi Pico W
+# It reads temperature, humidity, and CO2 data from sensors and update it on google sheets 
+# using urequests
 from machine import Pin
 from utime import sleep
 import urequests

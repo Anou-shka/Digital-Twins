@@ -2,8 +2,10 @@ fyp/
 PicoW_files/webrepl/
 FYP_Models/credentials.json
 FYP_Models/links.py
+FYP_Models/Finalizing_Models_data.ipynb
 
 credentials.json
 links.py
+Tableau/
 
 PicoW_files/wifi_pico_config.py

@@ -1,3 +1,8 @@
+# Flask App to Upload Data to Google Sheets
+# This Flask app receives data via a POST request and uploads it to a Google Sheet.
+# It uses the gspread library to interact with Google Sheets and oauth2client for authentication.
+# This is uploaded to Render.com for hosting.
+
 from flask import Flask, request
 import gspread 
 from oauth2client.service_account import ServiceAccountCredentials
@@ -11,7 +16,7 @@ app = Flask(__name__)
 # ## Set up the Google Sheet Credentials
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
-# ✅ Read Google Sheets Credentials from Environment Variable'
+# Read Google Sheets Credentials from Environment Variable'
 creds_json = os.getenv("GOOGLE_SHEETS_CREDS_JSON")
 
 if not creds_json:
@@ -24,7 +29,7 @@ try:
 except Exception as e:
     raise ValueError(f"⚠️ Failed to authenticate with Google Sheets: {e}")
 
-# ✅ Read Google Sheets URL from Environment Variable
+# Read Google Sheets URL from Environment Variable
 sheet_url = os.getenv("GOOGLE_SHEET_URL")
 
 if not sheet_url:
@@ -35,12 +40,12 @@ try:
 except Exception as e:
     raise ValueError(f"⚠️ Failed to open Google Sheet: {e}")
 
-# ✅ Homepage Route (Check if Flask is Running)
+# Homepage Route (Check if Flask is Running)
 @app.route('/')
 def home():
-    return "✅ Flask App is Running on Render!"
+    return "Flask App is Running on Render!"
 
-# ✅ Data Upload Route
+# Data Upload Route
 @app.route('/upload', methods=['POST'])
 def upload_data():
     try:
@@ -49,7 +54,7 @@ def upload_data():
         sgt = pytz.timezone("Asia/Singapore")
         timestamp = datetime.now(pytz.utc).astimezone(sgt).strftime('%Y-%m-%d %H:%M:%S')
 
-        # ✅ Extract values safely (default to 'N/A' if missing)
+        # Extract values safely (default to 'N/A' if missing)
         device = data.get('device', 'N/A')
         temp_C = data.get('temperature_C', 'N/A')
         temp_F = data.get('temperature_F', 'N/A')
@@ -61,16 +66,16 @@ def upload_data():
         co2 = data.get('co2', 'N/A')
        
 
-        # ✅ Prepare row for Google Sheets
+        # Prepare row for Google Sheets
         data_with_timestamp = [timestamp, device, temp_C, temp_F, humidity, co2, ADC, Voltage, pressure, airspeed]
         sheet.append_row(data_with_timestamp)
 
-        return '✅ Data Uploaded Successfully', 200
+        return 'Data Uploaded Successfully', 200
     
     except Exception as e:
-        return f"❌ Error: {e}", 500
+        return f"Error: {e}", 500
 
-# ✅ Run Flask App on Render (Dynamic Port)
+# Run Flask App on Render (Dynamic Port)
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Render assigns a port dynamically
     app.run(host="0.0.0.0", port=port, debug=False)

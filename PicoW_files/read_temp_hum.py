@@ -1,3 +1,7 @@
+# This code is for reading temperature and humidity from a DHT22 sensor
+# using the Raspberry Pi Pico W. It uses the DHT library to interface with the sensor.
+# The code initializes the sensor, reads temperature and humidity values, and converts the temperature from Celsius to Fahrenheit.
+
 from machine import Pin
 from time import sleep
 import dht 

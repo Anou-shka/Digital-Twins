@@ -1,3 +1,5 @@
+# This file is part of the PicoW files.
+# It contains the function that connects to WiFi and waits for a connection.
 import wifi_pico_config as wifi
 import network
 import time
